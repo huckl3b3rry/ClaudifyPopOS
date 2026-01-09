@@ -10,10 +10,23 @@
 
 ## System Overview
 - **OS**: Pop!_OS 24.04 LTS
-- **Desktop**: Cosmic (with GTK fallback portals)
+- **Desktop**: GNOME session (COSMIC apps available but have menu issues in GNOME)
 - **Audio Stack**: PipeWire 1.5.84 + WirePlumber + PulseAudio compatibility
 - **GPU**: NVIDIA RTX 3050 (used for Ollama/RAG)
 - **Kernel**: 6.17.9-76061709-generic
+- **Terminal**: gnome-terminal (default) - COSMIC terminal menus don't work in GNOME session
+
+## Displays
+| Output | Model | Resolution | Notes |
+|--------|-------|------------|-------|
+| DP-6 | Dell S2725QS | 2560x1440 | Secondary |
+| DP-7 | Samsung Smart M70C | 3072x1728 | Primary |
+| eDP-1 | Samsung (built-in) | 1536x960 | Laptop display |
+
+### Display Settings
+- **Auto-brightness disabled**: `gsettings set org.gnome.settings-daemon.plugins.power ambient-enabled false`
+- **Color matching**: Use `xrandr --output DISPLAY --gamma R:G:B` for quick adjustments
+- **Ambient Light Sensor**: `/sys/bus/iio/devices/iio:device0` (disabled via gsettings)
 
 ## Audio Devices
 | Device | Type | Status |
