@@ -10,7 +10,7 @@
 
 ## System Overview
 - **OS**: Pop!_OS 24.04 LTS
-- **Desktop**: GNOME session (COSMIC apps available but have menu issues in GNOME)
+- **Desktop**: COSMIC (with GTK fallback portals)
 - **Audio Stack**: PipeWire 1.5.84 + WirePlumber + PulseAudio compatibility
 - **GPU**: NVIDIA RTX 3050 (used for Ollama/RAG)
 - **Kernel**: 6.17.9-76061709-generic
@@ -26,15 +26,14 @@
 ### Display Settings
 - **Auto-brightness disabled**: `gsettings set org.gnome.settings-daemon.plugins.power ambient-enabled false`
 - **Color matching**: Use `xrandr --output DISPLAY --gamma R:G:B` for quick adjustments
-- **Ambient Light Sensor**: `/sys/bus/iio/devices/iio:device0` (disabled via gsettings)
 
 ## Audio Devices
-| Device | Type | Status |
-|--------|------|--------|
-| Sennheiser SP 20 for Lync | USB Speakerphone | Primary mic/speaker for calls |
-| Galaxy Buds2 Pro | Bluetooth (AAC/A2DP) | Mobile audio, supports HSP/HFP for calls |
-| Intel HDA PCH (ALC289) | Built-in | Backup |
-| 4x HDMI outputs | Monitors | Display audio |
+| Device | Type | Status | Reliability |
+|--------|------|--------|-------------|
+| Sennheiser SP 20 for Lync | USB Speakerphone | Primary mic/speaker | **High** - Use for calls |
+| Galaxy Buds2 Pro | Bluetooth (AAC/HFP) | Secondary audio | Medium - prone to mic dropouts |
+| Intel HDA PCH (ALC289) | Built-in | Backup | High |
+| 4x HDMI outputs | Monitors | Display audio | N/A |
 
 ## Audio Configuration Files
 
@@ -61,7 +60,7 @@
 - `~/.config/wireplumber/wireplumber.conf.d/52-bluetooth-galaxy-buds.conf`
   - Node latency: 4800/48000 (100ms buffer)
   - Priority: 3000
-  - Reconnect profiles enabled
+  - Reconnect profiles enabled for auto-recovery
 
 ### PipeWire Bluetooth Codecs (Compiled from source)
 - `/usr/lib/x86_64-linux-gnu/spa-0.2/bluez5/` - AAC, LDAC, aptX, SBC codecs
@@ -91,18 +90,20 @@
 
 ## Known Issues & Solutions
 
-### Bluetooth Audio Dropouts (Galaxy Buds)
-- **Cause**: Intel AX211 WiFi/BT combo chip coexistence + insufficient buffers
+### Bluetooth Mic Dropouts (Galaxy Buds)
+- **Cause**: Intel AX211 WiFi/BT combo chip coexistence interference
+- **Symptom**: Mic drops while output continues during calls
 - **Fix**: Increased WirePlumber Bluetooth buffer to 100ms, udev rule for autosuspend
+- **Workaround**: Use Sennheiser USB for critical calls
 - **Warning**: Do NOT enable BlueZ Experimental settings - breaks connection!
+
+### USB Audio (Sennheiser) Dropouts
+- **Cause**: Insufficient ALSA buffers, USB power management
+- **Fix**: WirePlumber rules with larger period-size (1024) and headroom (2048), udev rule to disable autosuspend
 
 ### Teams Microphone Not Working
 - **Cause**: USB autosuspend, missing groups, no WirePlumber rules
 - **Fix**: Udev rule + groups + WirePlumber configs + Flatpak overrides
-
-### USB Audio (Sennheiser) Dropouts
-- **Cause**: Insufficient ALSA buffers, USB power management
-- **Fix**: WirePlumber rules with larger period-size (1024) and headroom (2048)
 
 ### Voxtype F12 Not Working
 - **Cause**: User not in input group for current session
@@ -118,6 +119,7 @@
 ## Pending/On Hold
 - SilentKeys CUDA acceleration (waiting for RAG project to finish using GPU)
 - Ollama+wtype script for GPU-accelerated voice-to-text
+- Voxtype Vulkan crash investigation
 
 ## Quick Commands
 ```bash
@@ -133,6 +135,9 @@ pw-play /tmp/test.wav
 
 # Check for audio errors
 journalctl --user -u pipewire -u wireplumber --since "10 min ago" | grep -i error
+
+# Monitor audio in real-time
+pw-top
 
 # Connect Galaxy Buds
 bluetoothctl connect F8:5B:6E:F5:F3:9D
