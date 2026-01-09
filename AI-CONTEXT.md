@@ -1,5 +1,13 @@
 # ClaudifyPopOS - AI Context
 
+## AI Directives
+
+### Software Installation Policy
+**Always prefer native Linux versions over Windows emulation:**
+- Choose Flatpak, native packages, or Linux reimplementations over Wine/Snap Wine packages
+- Only use Windows emulation if there are serious reasons (specific features, compatibility requirements)
+- Rationale: Better system integration, lower resource usage, better stability, proper Wayland/PipeWire support
+
 ## System Overview
 - **OS**: Pop!_OS 24.04 LTS
 - **Desktop**: Cosmic (with GTK fallback portals)
